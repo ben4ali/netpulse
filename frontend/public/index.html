@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>NetPulse</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/TextPlugin.min.js"></script>
+    <script src="js/home.js" defer></script>
+</head>
+<body>
+    <main>
+        <!--Hero Header-->
+        <div class="heroHeader">
+            <div class="slogan">
+                <img src="assets/icons/netpulse_icon_invert.png" alt="">
+                <div class="sloganText">
+                    <h1>NetPulse</h1>
+                    <h4>Your Network's Heartbeat.</h4>
+                </div>
+            </div>
+            <div class="appInfo">
+                <p>Version 1.0.0</p>
+                <p id="currentDate">2024-08-13</p>
+            </div>
+        </div>
+
+        <!--Capture section-->
+        <section id="capture">
+
+            
+            <div class="captureHeader">
+                <div class="captureInfo">
+                    <h3 id="capturePlaceHolder">Capture</h3>
+                    <p>Select interface to scan</p>
+                </div>
+
+                <div class="captureOptions">
+                    <div class="loader">
+                        <div class="loader-inner">
+                            <div class="loader-block"></div>
+                            <div class="loader-block"></div>
+                            <div class="loader-block"></div>
+                            <div class="loader-block"></div>
+                            <div class="loader-block"></div>
+                            <div class="loader-block"></div>
+                            <div class="loader-block"></div>
+                            <div class="loader-block"></div>
+                        </div>
+                    </div>
+                    <button id="startBtn">SCAN</button>
+                </div>
+            </div>
+            <div class="interfaceHolder">
+
+                
+            </div>
+        </section>
+    </main>
+</body>
+</html>

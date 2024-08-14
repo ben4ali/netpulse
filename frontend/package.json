@@ -1,0 +1,23 @@
+{
+  "name": "network-analyzer",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "network",
+    "analyzer"
+  ],
+  "author": "Ali Benkarrouch",
+  "license": "ISC",
+  "description": "A network analyzer application using Electron for frontend and Flask for backend with scapy library.",
+  "devDependencies": {
+    "electron": "^31.3.1"
+  },
+  "dependencies": {
+    "axios": "^1.7.4",
+    "gsap": "^3.12.5"
+  }
+}
