@@ -472,6 +472,11 @@ main{
     transform: translateX(0.5%);
     transition: 0.25s;
 }
+.selectedPacket{
+    background-color: rgb(217,217,221755,0.1);
+    transform: translateX(0.5%);
+    transition: 0.25s;
+}
 .packet p{
     margin: 0;
     color: rgb(255,255,255,0.65);
@@ -585,7 +590,7 @@ main{
     opacity: 0.55;
 }
 .rawEncryption{
-    width: 70%;
+    width: 100%;
     display: flex;
     align-items: center;
     background-color: rgb(217,217,221755,0.035);
@@ -593,6 +598,7 @@ main{
     font-size: 20px;
     padding-left: 0.75rem;
     line-height: 2rem;
+    overflow-y: auto;
 }
 .rawEncryption p{
     margin: 0;

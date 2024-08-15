@@ -143,6 +143,11 @@ tabs[3].addEventListener('click', () => {
 function selectPacket(packetDiv) {
     selectTab(tabs[0]);
     showFrameInfo();
+    const packets = document.querySelectorAll('.packet');
+    packets.forEach(packet => {
+        packet.classList.remove('selectedPacket');
+    });
+    packetDiv.classList.add('selectedPacket');
     const packetFullInfo = packetDiv.getAttribute('data-fullInfo');
     if (currentPacketInfo === packetFullInfo) {
         return;
@@ -339,11 +344,9 @@ function parsePacket(packet) {
     const udpRegex = /<UDP\s+sport=(\w+)\s+dport=(\w+)\s+len=(\d+)\s+chksum=\S+\s*\|/;
     const rawRegex = /<Raw\s+load='(.+?)'\s+\|/;
 
-    const rawMatch = packet.match(rawRegex);
-    
     const etherMatch = packet.match(etherRegex);
     const ipMatch = packet.match(ipRegex);
-    
+
     if (!ipMatch) {
         return {
             Info: "Packet details could not be parsed."
@@ -351,9 +354,16 @@ function parsePacket(packet) {
     }
 
     const protocol = ipMatch[2].toLowerCase();
-    console.log(protocol);
     let transportMatch, info;
 
+    // Match the raw data first
+    const rawMatch = packet.match(rawRegex);
+    let rawHexDump = "";
+    if (rawMatch) {
+        rawHexDump = formatHexDump(rawMatch[1]);
+    }
+
+    // Match and parse TCP or UDP
     if (protocol === 'tcp') {
         transportMatch = packet.match(tcpRegex);
         if (transportMatch) {
@@ -376,7 +386,7 @@ function parsePacket(packet) {
             Length: ipMatch[1],
             Info: info || "No additional information available",
             FullPacketInfo: packet,
-            Raw: rawMatch ? rawMatch[1] : null
+            Raw: rawHexDump
         };
     } else {
         return {
@@ -385,6 +395,17 @@ function parsePacket(packet) {
     }
 }
 
+function formatHexDump(rawData) {
+    let hexDump = "";
+    for (let i = 0; i < rawData.length; i++) {
+        const hex = rawData.charCodeAt(i).toString(16).padStart(2, '0');
+        hexDump += hex + " ";
+        if ((i + 1) % 16 === 0) {
+            hexDump += "\n";
+        }
+    }
+    return hexDump.trim();
+}
 function stopPacketStream(){
     fetch('http://localhost:5001/stop_sniffing')
         .then(response => response.json())
