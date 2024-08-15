@@ -1,6 +1,5 @@
 const { ipcRenderer } = require('electron');
 
-const switchInterfaceBtn = document.getElementById("switchInterface")
 const tabs = document.querySelectorAll('.tab');
 const packetHolder = document.querySelector('.packetHolder');
 const clearBtn = document.getElementById('clearBtn');
@@ -14,16 +13,18 @@ const sheetBtn = document.getElementById('sheetBtn');
 const cheatSheet = document.querySelector('.cheatSheet');
 const infoHolder = document.querySelector('.infoContent');
 const rawHolder = document.querySelector('.rawEncryption');
+const interfaceName= document.getElementById('interfaceName');
 
 let packetStream = false;
 let packetInterval;
 let currentPacketInfo = null;
 let sheetOpen = false;
 
+
+//-----EVENT LISTENERS-----
 filterInput.addEventListener('keyup', () => {
     checkFilter();
 });
-
 sheetBtn.addEventListener("click",()=>{
     if (sheetOpen){
         gsap.to(cheatSheet,{
@@ -39,7 +40,6 @@ sheetBtn.addEventListener("click",()=>{
     }
     sheetOpen = !sheetOpen
 })
-
 playBtn.addEventListener('click', () => {
     console.log(packetStream);
     if (packetStream){return;}
@@ -82,9 +82,6 @@ restartBtn.addEventListener('click', () => {
 offBtn.addEventListener('click', () => {
     ipcRenderer.invoke('change-page', 'index.html');
 });
-switchInterfaceBtn.addEventListener('click', () => {
-    ipcRenderer.invoke('change-page', 'index.html');
-});
 tabs.forEach(tab => {
     tab.addEventListener('click', () => {
         selectTab(tab);
@@ -106,6 +103,9 @@ tabs[3].addEventListener('click', () => {
     showTransportInfo();
 });
 
+//-----FUNCTIONS-----
+
+//--Filtering--
 function checkFilter(){
     const filterValue = filterInput.value.toLowerCase();
     filterValue.replace(/\s/g, '');
@@ -131,7 +131,6 @@ function checkFilter(){
         displayAll();
     }
 }
-
 function displayIpSrc(ip){
     const packets = document.querySelectorAll('.packet');
     packets.forEach(packet => {
@@ -215,58 +214,12 @@ function displayAll(){
     });
 }
 
+//-- Packet info display --
 function selectTab(tab){
     tabs.forEach(t => {
         t.classList.remove('selectedTab');
     });
     tab.classList.add('selectedTab');
-}
-
-function getPacketStream(){
-    fetch('http://localhost:5001/start_sniffing')
-        .then(response => response.json())
-    packetInterval = setInterval(() => {
-        getPacket();
-    }, 500);
-}
-
-function getPacket() {
-    fetch('http://localhost:5001/get_packets')
-        .then(response => response.json())
-        .then(data => {
-            const parsedPackets = data.map((packet, index) => parsePacket(packet));
-            parsedPackets.forEach(packet => {
-                const packetDiv = document.createElement('div');
-                packetDiv.classList.add('packet');
-
-                // Append only the values, without labels
-                Object.values(packet).forEach(value => {
-                    const p = document.createElement('p');
-                    //dont add FullPacketInfo to the div in p value
-                    if (value !== packet.FullPacketInfo && value !== packet.Raw) {
-                        p.textContent = value;
-                    }
-                    packetDiv.appendChild(p);
-                    packetDiv.setAttribute('data-fullInfo', packet.FullPacketInfo);
-                    packetDiv.setAttribute('data-raw', packet.Raw);
-                    packetDiv.style.opacity = 0;
-                    gsap.to(packetDiv, {
-                        opacity: 1,
-                        duration: 1
-                    });
-                    packetDiv.addEventListener('click', () => {
-                        selectPacket(packetDiv);
-                    });
-                });
-                if (packetDiv.lastElementChild.textContent !== "Packet details could not be parsed.") {
-                    packetHolder.appendChild(packetDiv);
-                }
-            });
-            packetHolder.scrollTop = packetHolder.scrollHeight;
-        })
-        .catch(error => {
-            console.error(error);
-        });
 }
 function selectPacket(packetDiv) {
     selectTab(tabs[0]);
@@ -321,17 +274,17 @@ function showFrameInfo() {
 function showEthernetInfo() {
     if (currentPacketInfo === null){return}
     selectTab(tabs[1]);
-    // Extract Ethernet details
+    // get ethernet info
     let ethernetMatch = currentPacketInfo.match(/<Ether\s+dst=(\S+)\s+src=(\S+)\s+type=(\S+)/);
     if (ethernetMatch) {
         let destination = ethernetMatch[1];
         let source = ethernetMatch[2];
         let type = ethernetMatch[3];
 
-        // Determine type of frame
+        // determine type of frame
         let typeDescription = type === "IPv4" ? "IPv4 (0x0800)" : "Unknown";
 
-        // Format the Ethernet information
+        // format ethernet info
         let ethernetInfo = `
             Ethernet II
                 Destination: ${destination} (Unicast)
@@ -339,7 +292,7 @@ function showEthernetInfo() {
                 Type: ${typeDescription}
         `;
 
-        // Clear previous info and display the new Ethernet information
+        // clear element and display new info
         infoHolder.innerHTML = "";
         ethernetInfo.split('\n').forEach(info => {
             const p = document.createElement('p');
@@ -352,11 +305,11 @@ function showIPInfo() {
     if (currentPacketInfo === null){return}
     selectTab(tabs[2]);
 
-    // Extract IP details using a regular expression
+    // regex
     let ipMatch = currentPacketInfo.match(/<IP\s+version=(\d+)\s+ihl=(\d+)\s+tos=0x(\w+)\s+len=(\d+)\s+id=(\d+)\s+flags=(\S+)\s+frag=(\d+)\s+ttl=(\d+)\s+proto=(\S+)\s+chksum=0x(\w+)\s+src=(\S+)\s+dst=(\S+)/);
     if (ipMatch) {
         let version = ipMatch[1];
-        let ihl = ipMatch[2] * 4; // ihl is in 32-bit words, so multiply by 4 to get bytes
+        let ihl = ipMatch[2] * 4;
         let dscp = ipMatch[3];
         let totalLength = ipMatch[4];
         let identification = parseInt(ipMatch[5]).toString(16);
@@ -368,7 +321,7 @@ function showIPInfo() {
         let srcIP = ipMatch[11];
         let dstIP = ipMatch[12];
 
-        // Format the IP information
+        // format information
         let ipInfo = `
             Internet Protocol Version ${version}, Src: ${srcIP}, Dst: ${dstIP}
                 Version: ${version}
@@ -385,7 +338,7 @@ function showIPInfo() {
                 Destination: ${dstIP}
         `;
 
-        // Clear previous info and display the new IP information
+        // clear element and display new info
         infoHolder.innerHTML = "";
         ipInfo.split('\n').forEach(info => {
             const p = document.createElement('p');
@@ -408,7 +361,7 @@ function showTransportInfo() {
         let dstPort = transportMatch[2];
         let seqNum = transportMatch[3];
         let ackNum = transportMatch[4];
-        let headerLength = transportMatch[5] * 4; // in bytes
+        let headerLength = transportMatch[5] * 4;
         let flags = transportMatch[7];
         let windowSize = transportMatch[8];
         let checksum = transportMatch[9];
@@ -427,9 +380,8 @@ function showTransportInfo() {
                 Urgent Pointer: ${urgentPointer}
         `;
 
-        tabs[3].firstElementChild.textContent = "TCP"; // Update the tab title to TCP
+        tabs[3].firstElementChild.textContent = "TCP";
     } else {
-        console.log("UDP");
         transportMatch = currentPacketInfo.match(/<UDP\s+sport=(\d+)\s+dport=(\d+)\s+len=(\d+)\s+chksum=0x(\w+)/);
         if (transportMatch) {
             let srcPort = transportMatch[1];
@@ -445,11 +397,9 @@ function showTransportInfo() {
                     Checksum: 0x${checksum}
             `;
 
-            tabs[3].firstElementChild.textContent = "UDP"; // Update the tab title to UDP
+            tabs[3].firstElementChild.textContent = "UDP";
         }
     }
-
-    // Clear previous info and display the new transport layer information
     if (transportInfo) {
         infoHolder.innerHTML = "";
         transportInfo.split('\n').forEach(info => {
@@ -460,8 +410,51 @@ function showTransportInfo() {
     }
 }
 
+//-- Packet Stream
+function getPacketStream(){
+    fetch('http://localhost:5001/start_sniffing')
+        .then(response => response.json())
+    packetInterval = setInterval(() => {
+        getPacket();
+    }, 500);
+}
+function getPacket() {
+    fetch('http://localhost:5001/get_packets')
+        .then(response => response.json())
+        .then(data => {
+            const parsedPackets = data.map((packet, index) => parsePacket(packet));
+            parsedPackets.forEach(packet => {
+                const packetDiv = document.createElement('div');
+                packetDiv.classList.add('packet');
 
-
+                //add values
+                Object.values(packet).forEach(value => {
+                    const p = document.createElement('p');
+                    if (value !== packet.FullPacketInfo && value !== packet.Raw) {
+                        p.textContent = value;
+                    }
+                    packetDiv.appendChild(p);
+                    packetDiv.setAttribute('data-fullInfo', packet.FullPacketInfo);
+                    packetDiv.setAttribute('data-raw', packet.Raw);
+                    packetDiv.style.opacity = 0;
+                    gsap.to(packetDiv, {
+                        opacity: 1,
+                        duration: 1
+                    });
+                    packetDiv.addEventListener('click', () => {
+                        selectPacket(packetDiv);
+                    });
+                });
+                if (packetDiv.lastElementChild.textContent !== "Packet details could not be parsed.") {
+                    packetHolder.appendChild(packetDiv);
+                }
+            });
+            packetHolder.scrollTop = packetHolder.scrollHeight;
+        })
+        .catch(error => {
+            console.error(error);
+        });
+}
 function parsePacket(packet) {
     const etherRegex = /<Ether\s+dst=([a-f0-9:]+)\s+src=([a-f0-9:]+)\s+type=\w+\s+\|/;
     const ipRegex = /<IP\s+version=\d\s+ihl=\d+\s+tos=\S+\s+len=(\d+)\s+id=\d+\s+flags=\S+\s+frag=\d+\s+ttl=\d+\s+proto=(\w+)\s+chksum=\S+\s+src=([0-9.]+)\s+dst=([0-9.]+)\s+\|/;
@@ -481,14 +474,14 @@ function parsePacket(packet) {
     const protocol = ipMatch[2].toLowerCase();
     let transportMatch, info;
 
-    // Match the raw data first
+    // match raw data
     const rawMatch = packet.match(rawRegex);
     let rawHexDump = "";
     if (rawMatch) {
         rawHexDump = formatHexDump(rawMatch[1]);
     }
 
-    // Match and parse TCP or UDP
+    // match and parse TCP or UDP
     if (protocol === 'tcp') {
         transportMatch = packet.match(tcpRegex);
         if (transportMatch) {
@@ -519,7 +512,6 @@ function parsePacket(packet) {
         };
     }
 }
-
 function formatHexDump(rawData) {
     let hexDump = "";
     for (let i = 0; i < rawData.length; i++) {
@@ -542,11 +534,11 @@ function stopPacketStream(){
         });
     clearInterval(packetInterval);
 }
-
 function clearPacketHolder(){
     packetHolder.innerHTML = "";
 }
 
+//--status and info
 function checkServerOnline(){
     setInterval(() => {
         fetch('http://localhost:5001/check_server_online')
@@ -554,6 +546,7 @@ function checkServerOnline(){
             .then(data => {
                 serverStatusText.textContent = "Server Status: Online";
                 serverStatusText.style.color = "rgb(35, 190, 108,0.9)";
+                interfaceName.textContent = data.interface;
             })
             .catch(error => {
                 serverStatusText.style.color = "rgba(244, 91, 88, 0.967)";
@@ -562,8 +555,8 @@ function checkServerOnline(){
     }, 1000);
 }
 
+//-----INIT-----
 checkServerOnline()
-// getPacketStream();
 setTimeout(() => {
     stopPacketStream();
 }, 10500);

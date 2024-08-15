@@ -33,7 +33,10 @@ def stop_sniffing():
 
 @app.route('/check_server_online')
 def check_server_online():
-    return jsonify({'message': 'Server is online'})
+    return jsonify({
+                    'message': 'Server is online',
+                    'interface': scapy_helper.get_inteface()
+                    })
 
 if __name__ == "__main__":
     print("Flask server is now running on port 5001")

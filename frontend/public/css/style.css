@@ -310,7 +310,7 @@ main{
 .statusHolder{
     display: flex;
     gap: 1rem;
-    width: 65%;
+    width: 100%;
     margin-left: 1rem;
 }
 .statusHolder p{
@@ -324,8 +324,10 @@ main{
 .ifaceHolder{
     display: flex;
     gap: 1rem;
+    justify-content: end;
     margin-right: 2rem;
     align-items: center;
+    width: 25%;
 }
 .ifaceHolder h4{
     margin: 0;

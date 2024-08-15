@@ -1,21 +1,18 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 
-
-
-
-//function to create a window
 function createWindow(page) {
     const win = new BrowserWindow({
         width: 800,
         height: 600,
+        icon: path.join(__dirname, 'public', 'assets', 'icons', 'netpulse_icon_invert.png'), // Adjusted icon path
         webPreferences: {
-            nodeIntegration: true,        // allows Node.js features in the renderer
-            contextIsolation: false       // allows access to Node.js features directly
+            nodeIntegration: true,
+            contextIsolation: false
         }
     });
-
-    win.loadFile(path.join(__dirname, 'public', page)); // Load the specified page
+    win.setMenu(null);
+    win.loadFile(path.join(__dirname, 'public', page));
 }
 
 //app initialization
