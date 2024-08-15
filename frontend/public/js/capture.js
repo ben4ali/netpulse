@@ -9,8 +9,36 @@ const stopBtn = document.getElementById('stopBtn');
 const restartBtn = document.getElementById('restartBtn');
 const offBtn = document.getElementById('offBtn');
 const serverStatusText = document.getElementById('serverStatusText');
+const filterInput = document.getElementById('filterInput');
+const sheetBtn = document.getElementById('sheetBtn');
+const cheatSheet = document.querySelector('.cheatSheet');
+const infoHolder = document.querySelector('.infoContent');
+const rawHolder = document.querySelector('.rawEncryption');
 
 let packetStream = false;
+let packetInterval;
+let currentPacketInfo = null;
+let sheetOpen = false;
+
+filterInput.addEventListener('keyup', () => {
+    checkFilter();
+});
+
+sheetBtn.addEventListener("click",()=>{
+    if (sheetOpen){
+        gsap.to(cheatSheet,{
+            height:"0",
+            opacity:0
+        })
+    }else{
+        gsap.to(cheatSheet,{
+            height:"8rem",
+            opacity:1,
+            ease:"back"
+        })
+    }
+    sheetOpen = !sheetOpen
+})
 
 playBtn.addEventListener('click', () => {
     console.log(packetStream);
@@ -54,7 +82,6 @@ restartBtn.addEventListener('click', () => {
 offBtn.addEventListener('click', () => {
     ipcRenderer.invoke('change-page', 'index.html');
 });
-
 switchInterfaceBtn.addEventListener('click', () => {
     ipcRenderer.invoke('change-page', 'index.html');
 });
@@ -66,6 +93,127 @@ tabs.forEach(tab => {
 clearBtn.addEventListener('click', () => {
     clearPacketHolder();
 });
+tabs[0].addEventListener('click', () => {
+    showFrameInfo();
+});
+tabs[1].addEventListener('click', () => {
+    showEthernetInfo();
+});
+tabs[2].addEventListener('click', () => {
+    showIPInfo();
+});
+tabs[3].addEventListener('click', () => {
+    showTransportInfo();
+});
+
+function checkFilter(){
+    const filterValue = filterInput.value.toLowerCase();
+    filterValue.replace(/\s/g, '');
+
+    if (filterValue.includes("ip.src==")){
+        displayIpSrc(filterValue.slice(8));
+    }
+    else if (filterValue.includes("ip.dst==")){
+        displayIpDst(filterValue.slice(8));
+    }
+    else if (filterValue.includes("port.src==")){
+        displayPortSrc(filterValue.slice(9));
+    }
+    else if (filterValue.includes("port.dst==")){
+        displayPortDst(filterValue.slice(9));
+    }
+    else if (filterValue.includes("protocol==")){
+        displayProtocol(filterValue.slice(10));
+    }
+    else if (filterValue.includes("length==")){
+        displayLength(filterValue.slice(8));
+    }else{
+        displayAll();
+    }
+}
+
+function displayIpSrc(ip){
+    const packets = document.querySelectorAll('.packet');
+    packets.forEach(packet => {
+        const src = packet.children[2].textContent;
+        if (src.includes(ip)){
+            packet.style.display = "flex";
+        }
+        else{
+            packet.style.display = "none";
+        }
+    });
+}
+function displayIpDst(ip){
+    const packets = document.querySelectorAll('.packet');
+    packets.forEach(packet => {
+        const dst = packet.children[3].textContent;
+        if (dst.includes(ip)){
+            packet.style.display = "flex";
+        }
+        else{
+            packet.style.display = "none";
+        }
+    });
+}
+function displayPortSrc(port){
+    const packets = document.querySelectorAll('.packet');
+    packets.forEach(packet => {
+        const src = packet.children[0].textContent.split(">")[0];
+        src.replace(/\s/g, '');
+        port = port.slice(1);
+        if (src.includes(port)){
+            packet.style.display = "flex";
+        }
+        else{
+            packet.style.display = "none";
+        }
+    });
+}
+function displayPortDst(port){
+    const packets = document.querySelectorAll('.packet');
+    packets.forEach(packet => {
+        const dst = packet.children[0].textContent.split(">")[1];
+        dst.replace(/\s/g, '');
+        port = port.slice(1);
+        if (dst.includes(port)){
+            packet.style.display = "flex";
+        }
+        else{
+            packet.style.display = "none";
+        }
+    });
+}
+function displayProtocol(protocol){
+    const packets = document.querySelectorAll('.packet');
+    packets.forEach(packet => {
+        const proto = packet.children[4].textContent.toLowerCase();
+        if (proto.includes(protocol)){
+            packet.style.display = "flex";
+        }
+        else{
+            packet.style.display = "none";
+        }
+    });
+}
+function displayLength(length){
+    const packets = document.querySelectorAll('.packet');
+    packets.forEach(packet => {
+        const len = packet.children[5].textContent;
+        if (len.includes(length)){
+            packet.style.display = "flex";
+        }
+        else{
+            packet.style.display = "none";
+        }
+    });
+}
+function displayAll(){
+    const packets = document.querySelectorAll('.packet');
+    packets.forEach(packet => {
+        packet.style.display = "flex";
+    });
+}
 
 function selectTab(tab){
     tabs.forEach(t => {
@@ -73,9 +221,6 @@ function selectTab(tab){
     });
     tab.classList.add('selectedTab');
 }
-
-
-let packetInterval;
 
 function getPacketStream(){
     fetch('http://localhost:5001/start_sniffing')
@@ -123,23 +268,6 @@ function getPacket() {
             console.error(error);
         });
 }
-
-const infoHolder = document.querySelector('.infoContent');
-let currentPacketInfo = null;
-
-tabs[0].addEventListener('click', () => {
-    showFrameInfo();
-});
-tabs[1].addEventListener('click', () => {
-    showEthernetInfo();
-});
-tabs[2].addEventListener('click', () => {
-    showIPInfo();
-});
-tabs[3].addEventListener('click', () => {
-    showTransportInfo();
-});
-
 function selectPacket(packetDiv) {
     selectTab(tabs[0]);
     showFrameInfo();
@@ -155,8 +283,6 @@ function selectPacket(packetDiv) {
     rawHolder.firstElementChild.textContent = packetDiv.getAttribute('data-raw');
     currentPacketInfo = packetFullInfo;
 }
-
-
 function showFrameInfo() {
     if (currentPacketInfo === null){return}
     selectTab(tabs[0]);
@@ -271,8 +397,7 @@ function showIPInfo() {
 function showTransportInfo() {
     if (currentPacketInfo === null){return}
     selectTab(tabs[3]);
-    console.log("Transport Info");
-    // Determine if the protocol is TCP or UDP
+
     let transportMatch = currentPacketInfo.match(/<TCP\s+sport=(\d+)\s+dport=(\S+)\s+seq=(\d+)\s+ack=(\d+)\s+dataofs=(\d+)\s+reserved=(\d+)\s+flags=(\S+)\s+window=(\d+)\s+chksum=0x(\w+)\s+urgptr=(\d+)/);
     let isTCP = transportMatch !== null;
     
@@ -335,7 +460,7 @@ function showTransportInfo() {
     }
 }
 
-const rawHolder = document.querySelector('.rawEncryption');
+
 
 function parsePacket(packet) {
     const etherRegex = /<Ether\s+dst=([a-f0-9:]+)\s+src=([a-f0-9:]+)\s+type=\w+\s+\|/;
@@ -436,6 +561,7 @@ function checkServerOnline(){
             });
     }, 1000);
 }
+
 checkServerOnline()
 // getPacketStream();
 setTimeout(() => {
