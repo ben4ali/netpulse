@@ -1,4 +1,4 @@
-# Network Analyzer App
+# Netpulse - Network Analyzer Native App
 
 **⚠️ **WARNING** ⚠️**
 
