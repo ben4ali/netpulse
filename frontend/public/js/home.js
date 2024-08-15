@@ -66,6 +66,9 @@ function getAllInterfaces() {
 
     })
     .catch(error => {
+        setTimeout(() => {
+            getAllInterfaces();
+        }, 2000);
         console.error(error);
     });
 }

@@ -1,12 +1,12 @@
 import scapy.all as scapy
-import io
+import threading
 
 class ScapyHelper:
     def __init__(self):
         self.interfaces = self.get_interfaces()
         self.interface = scapy.conf.iface
         self.sniffed_packets = []
-        self.stop_filter = lambda x: False
+        self.stop_sniffing_event = threading.Event()  # Event to stop sniffing
 
     def get_interfaces(self):
         interfaces = []
@@ -19,17 +19,23 @@ class ScapyHelper:
         scapy.conf.iface = interface_name
 
     def start_sniffing(self):
+        print("STARTING SNIFFING")
         self.sniffed_packets = []
-        scapy.sniff(iface="Wi-Fi", prn=lambda x: self.packet_handler(x))
+        self.stop_sniffing_event.clear()  # Clear the event before starting sniffing
+        scapy.sniff(iface=self.interface, prn=self.packet_handler, stop_filter=self.stop_filter)
 
     def packet_handler(self, packet):
+        if self.stop_sniffing_event.is_set():
+            return  # Exit if stopping sniffing
         packet_details = repr(packet)
         self.sniffed_packets.append(packet_details)
 
-
     def stop_sniffing(self):
-        scapy.sniff(iface="Wi-Fi", stop_filter=self.stop_filter)
+        print("STOPPING SNIFFING")
+        self.stop_sniffing_event.set()  # Set the event to stop sniffing
 
+    def stop_filter(self, packet):
+        return self.stop_sniffing_event.is_set()
 
     def get_sniffed_packets(self):
         packets = self.sniffed_packets

@@ -300,12 +300,26 @@ main{
 }
 .optionsHolder svg{
     margin-block: 0.4rem;
-    height: 2rem;
+    height: 1.25rem;
     fill: rgb(255,255,255,0.6);
 }
 .optionsHolder svg:hover{
     cursor: pointer;
     fill: rgb(255,255,255,1);
+}
+.statusHolder{
+    display: flex;
+    gap: 1rem;
+    width: 65%;
+    margin-left: 1rem;
+}
+.statusHolder p{
+    margin: 0;
+    font-weight: 300;
+    opacity: 0.75;
+    font-size: 15px;
+    letter-spacing: 1px;
+    color: rgb(35, 190, 108);
 }
 .ifaceHolder{
     display: flex;
@@ -408,7 +422,7 @@ main{
     fill: rgb(255,255,255,0.75);
 }
 .packetInfo p:nth-child(1){
-    width: 4%
+    width: 8%
 }
 .packetInfo p:nth-child(2){
     width: 6.85%;
@@ -463,7 +477,7 @@ main{
     color: rgb(255,255,255,0.65);
 }
 .packet p:nth-child(1){
-    width: 5%;
+    width: 8%;
 }
 .packet p:nth-child(2){
     width: 8%;
@@ -504,9 +518,13 @@ main{
     border-radius: 6px 6px 0px 0px;
     border-bottom: none;
     width: 9.5rem;
+    height: 3.1rem;
+
 }
 .selectedTab{
     background-color: #030014 ;
+    transform: translateY(-0.65rem);
+    height: 4rem;
 }
 .selectedTab p {
     opacity: 1 !important;
@@ -525,13 +543,21 @@ main{
     cursor: pointer;
     background-color: #030014;
     transition: 0.25s;
-    transform: none;
+    transform: translateY(-0.65rem);
 }
 .infoContent{
     width: 75%;
-    height: 90%;
-
+    height: 82%;
+    padding-left: 1rem;
+    padding-top: 0.5rem;
+    font-size: 20px;
     border-right: 2px solid rgb(255,255,255,0.3);
+    overflow-y: auto;
+    margin-block: 1rem;
+}
+.infoContent p {
+    margin: 0;
+    opacity: 0.75;
 }
 .encryptionHolder{
     width: 25%;
