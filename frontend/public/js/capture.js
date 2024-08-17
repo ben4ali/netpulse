@@ -557,6 +557,3 @@ function checkServerOnline(){
 
 //-----INIT-----
 checkServerOnline()
-setTimeout(() => {
-    stopPacketStream();
-}, 10500);

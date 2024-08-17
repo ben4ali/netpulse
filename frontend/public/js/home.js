@@ -10,7 +10,7 @@ let currentInterface = null;
 
 setTimeout(() => {
     getAllInterfaces();
-}, 1000);
+}, 10000);
 
 
 
