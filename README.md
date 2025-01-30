@@ -8,7 +8,7 @@
 
 ## Overview
 
-**Network Analyzer** is a native application designed to help you capture and analyze network packets. The app provides a simple and intuitive user interface to view and interpret the data packets transmitted over your network.
+**NetPulse** is a native application designed to help you capture and analyze network packets. The app provides a simple and intuitive user interface to view and interpret the data packets transmitted over your network.
 
 The application is built using:
 
