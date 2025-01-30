@@ -22,6 +22,17 @@ The application is built using:
 - **Detailed Analysis:** View detailed information about each packet, including Ethernet, IP, TCP, and UDP protocols.
 - **Simple UI:** An easy-to-use interface for understanding and analyzing network basics.
 
+## Preview
+
+Here are some screenshots of the Network Analyzer app in action:
+
+![Interface picker](previews/preview1.png)
+*Pick interface to scan*
+
+![Detailed Analysis](previews/preview2.png)
+*Packet capture and filter*
+
+
 ## Getting Started
 
 To get started with the Network Analyzer app, follow these steps:
